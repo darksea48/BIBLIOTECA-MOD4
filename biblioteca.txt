@@ -1,2 +1,4 @@
 6596,Don Quijote de la Mancha,Miguel de Cervantes,1605,Disponible
-9819,Don Quijote de la Mancha,Miguel de Cervantes,1605,Disponible
+3267,Las aventuras de Sherlock Holmes,Arthur Conan Doyle,2012,Disponible
+6550,El sabueso de los Baskerville,Arthur Conan Doyle,1902,Disponible
+5507,Don Quijote de la Mancha,Miguel de Cervantes,1605,Disponible
