@@ -36,3 +36,8 @@ def agregar_dato(archivo: str, dato: str):
     datos = cargar_datos(archivo)
     datos.append(dato)
     guardar_datos(archivo, datos)
+
+"""def volver_atras(input_usado):
+    if input_usado == "q":
+        return"""
+        

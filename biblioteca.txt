@@ -2,3 +2,7 @@
 3267,Las aventuras de Sherlock Holmes,Arthur Conan Doyle,2012,Disponible
 6550,El sabueso de los Baskerville,Arthur Conan Doyle,1902,Disponible
 5507,Don Quijote de la Mancha,Miguel de Cervantes,1605,Disponible
+2796,Subterra,Baldomero Lillo,1904,Disponible
+2681,Libro 3,Autor 3,2025,Disponible
+8203,Libro 4,Autor 4,2025,Disponible
+2548,Libro 5,Autor 5,2025,Disponible

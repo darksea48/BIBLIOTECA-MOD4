@@ -36,6 +36,7 @@ def menu():
                 id = randint(1000, 9999)
                 nuevo_libro = Libro(id, titulo.strip(), autor.strip(), anio_publicacion)
                 biblioteca.agregar_libro(nuevo_libro)
+                biblioteca.cargar_lista()
                 input("Presiona Enter para continuar...")
             elif opcion == 2:
                 # Ver todos los libros
@@ -47,21 +48,26 @@ def menu():
                 input("Presiona Enter para continuar...")
             elif opcion == 3:
                 limpiar_pantalla()
+                biblioteca.cargar_lista()
                 print("".center(50, '-'))
                 print("Buscar libro".center(50, ' '))
                 print("".center(50, '-'))
-                libro_buscado = input("Ingrese el libro que deseas buscar (Puede ser el título o el autor): ")
+                libro_buscado = input("Ingrese el libro que deseas buscar (Puede ser el título o el ID): ")
                 libro_seleccionado = biblioteca.buscar_libro(libro_buscado)
                 if libro_seleccionado:
-                    print(f"Libro encontrado:\nLibro: {libro_seleccionado.titulo}\nAutor: {libro_seleccionado.autor}\nAño de publicación: {libro_seleccionado.anio_publicacion}")
-                    print("".center(50, '-'))
+                    id_libro = libro_seleccionado.get_id()
                     while True:
                         try:
+                            print(f"\nLibro encontrado:\nLibro: {libro_seleccionado.titulo}\nAutor: {libro_seleccionado.autor}\nAño de publicación: {libro_seleccionado.anio_publicacion}")
+                            print("".center(50, '-'))
+                            estado = libro_seleccionado.get_estado()
                             print("Opciones:")
-                            print("1. Marcar como prestado")
-                            print("2. Devolver libro")
-                            print("3. Editar datos del libro")
-                            print("4. Eliminar libro")
+                            if estado == "Disponible":
+                                print("1. Marcar como prestado")
+                            else:
+                                print("1. Devolver libro")
+                            print("2. Editar datos del libro")
+                            print("3. Eliminar libro")
                             print("9. Volver al menú principal")
                             subopcion = int(input("Elige una opción: "))
                         except ValueError:
@@ -70,38 +76,60 @@ def menu():
                         except Exception as e:
                             print(f"Ocurrió un error: {e}")
                             input("Presiona Enter para continuar...")
-                        if subopcion == 1:
+                        if subopcion == 1 and estado == "Disponible":
                             # Marcar como prestado
-                            biblioteca.marcar_libro_prestado(libro_seleccionado, "Prestado")
+                            print("¿Desea marcar este libro como prestado? (S/N)")
+                            respuesta = input().upper()
+                            if respuesta == "S":
+                                biblioteca.modificar_estado(id_libro, "Prestado")
+                                print("Libro marcado como prestado.")
+                            else:
+                                print("Operación cancelada.")
+                            input("Presiona Enter para continuar...")
+                        elif subopcion == 1 and estado == "Prestado":
+                            # Devolver libro
+                            print("¿Quieres marcar este libro como devuelto? (S/N)")
+                            respuesta = input().upper()
+                            if respuesta == "S":
+                                biblioteca.modificar_estado(id_libro, "Disponible")
+                                print("Libro marcado como prestado.")
+                            else:
+                                print("Operación cancelada.")
                             input("Presiona Enter para continuar...")
                         elif subopcion == 2:
-                            # Devolver libro
-                            biblioteca.devolver_libro(libro_seleccionado, "Disponible")
-                            input("Presiona Enter para continuar...")
-                        elif subopcion == 3:
                             # Editar datos del libro
-                            pregunta_titulo = input("¿Desea editar el título? (S/N) ").upper() == "S"
+                            pregunta_titulo = input("¿Desea editar el título? (S/N) ").upper()
                             if pregunta_titulo == "S":
                                 nuevo_titulo = input("Nuevo título: ")
-                            pregunta_autor = input("¿Desea editar el autor? (S/N) ").upper() == "S"
+                            else:
+                                nuevo_titulo = libro_seleccionado.titulo
+                            pregunta_autor = input("¿Desea editar el autor? (S/N) ").upper()
                             if pregunta_autor == "S":
                                 nuevo_autor = input("Nuevo autor: ")
-                            pregunta_anio_publicacion = input("¿Desea editar el año de publicación? (S/N) ").upper() == "S"
+                            else:
+                                nuevo_autor = libro_seleccionado.autor
+                            pregunta_anio_publicacion = input("¿Desea editar el año de publicación? (S/N) ").upper()
                             if pregunta_anio_publicacion == "S":
-                                nuevo_anio_publicacion = int(input("Nuevo año de publicación: "))
-                            biblioteca.editar_libro(libro_seleccionado, nuevo_titulo, nuevo_autor, nuevo_anio_publicacion)
+                                while True:
+                                    try:
+                                        nuevo_anio_publicacion = int(input("Nuevo año de publicación: "))
+                                        break
+                                    except ValueError:
+                                        print("Entrada inválida. Por favor, ingrese un número para el año.")
+                            else:
+                                nuevo_anio_publicacion = libro_seleccionado.anio_publicacion
+                            biblioteca.editar_datos(libro_seleccionado, nuevo_titulo, nuevo_autor, nuevo_anio_publicacion)
                             input("Presiona Enter para continuar...")
-                        elif subopcion == 4:
+                        elif subopcion == 3:
                             # Eliminar libro
-                            libro_eliminar = libro_seleccionado.id
-                            rusur = input("¿Está seguro de que desea eliminar este libro? (S/N) ").upper()
-                            if rusur == "S":
-                                biblioteca.eliminar_libro(libro_seleccionado.id)
+                            r_u_sure = input("¿Está seguro de que desea eliminar este libro? (S/N) ").upper()
+                            if r_u_sure == "S":
+                                biblioteca.eliminar_libro(libro_seleccionado.get_id())
                                 print("\nLibro eliminado.")
                                 input("Presiona Enter para continuar...")
                                 break
-                            elif rusur == "N":
-                                print("Eliminación de libro cancelada por el usuario.")
+                            elif r_u_sure == "N":
+                                print("\nEliminación de libro cancelada por el usuario.")
                             else:
                                 print("Opción inválida. Intenta de nuevo.")
                             input("Presiona Enter para continuar...")
@@ -118,18 +146,19 @@ def menu():
                 try:
                     limpiar_pantalla()
                     print("Buscar libro a prestar".center(50, ' '))
-                    libro_buscado = input("Ingrese el libro que deseas buscar (Puede ser el título o el autor): ")
+                    libro_buscado = input("Ingrese el libro que deseas buscar (Puede ser el título o el ID): ")
                     libro_encontrado = biblioteca.buscar_libro(libro_buscado)
                     if libro_encontrado:
+                        print("Libro encontrado:")
+                        print(f"Título: {libro_encontrado.titulo}\nAutor: {libro_encontrado.autor}\nAño de publicación: {libro_encontrado.anio_publicacion}")
                         if libro_encontrado.get_estado() == "Prestado":
                             raise EstadoIdentico
                         else:
-                            print("Libro encontrado:")
-                            print(f"Título: {libro_encontrado.titulo}\nAutor: {libro_encontrado.autor}\nAño de publicación: {libro_encontrado.anio_publicacion}")
+                            id_libro = libro_encontrado.get_id()
                             print("¿Desea marcar este libro como prestado? (S/N)")
                             respuesta = input().upper()
                             if respuesta == "S":
-                                biblioteca.modificar_estado(libro_encontrado, "Prestado")
+                                biblioteca.modificar_estado(id_libro, "Prestado")
                                 print("Libro marcado como prestado.")
                             else:
                                 print("Operación cancelada.")
@@ -147,19 +176,19 @@ def menu():
                 try:
                     limpiar_pantalla()
                     print("Buscar libro a prestar".center(50, ' '))
-                    libro_buscado = input("Ingrese el libro que deseas buscar (Puede ser el título o el autor): ")
+                    libro_buscado = input("Ingrese el libro que deseas buscar (Puede ser el título o el ID): ")
                     libro_encontrado = biblioteca.buscar_libro(libro_buscado)
                     if libro_encontrado:
-                        if libro_encontrado.get_estado() == "Prestado":
+                        print("Libro encontrado:")
+                        print(f"Título: {libro_encontrado.titulo}\nAutor: {libro_encontrado.autor}\nAño de publicación: {libro_encontrado.anio_publicacion}")
+                        if libro_encontrado.get_estado() == "Disponible":
                             raise EstadoIdentico
                         else:
-                            print("Libro encontrado:")
-                            print(f"Título: {libro_encontrado.titulo}\nAutor: {libro_encontrado.autor}\nAño de publicación: {libro_encontrado.anio_publicacion}")
-                            print(f"Título: {libro_encontrado.titulo}\nAutor: {libro_encontrado.autor}\nAño de publicación: {libro_encontrado.anio_publicacion}")
-                            print("¿Desea marcar este libro como disponible nuevamente? (S/N)")
+                            id_libro = libro_encontrado.get_id()
+                            print("¿Quieres marcar este libro como devuelto? (S/N)")
                             respuesta = input().upper()
                             if respuesta == "S":
-                                biblioteca.modificar_estado(libro_encontrado, "Disponible")
+                                biblioteca.modificar_estado(id_libro, "Disponible")
                                 print("Libro marcado como prestado.")
                             else:
                                 print("Operación cancelada.")
