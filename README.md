@@ -40,8 +40,8 @@ BIBLIOTECA-MOD4/
 ├── Clases.py           # Define las clases principales (Libro, Biblioteca) y excepciones.
 ├── funciones.py        # Contiene funciones de utilidad (cargar/guardar datos, limpiar pantalla).
 ├── main.py             # Punto de entrada de la aplicación, contiene el menú y la lógica de usuario.
-├── biblioteca.txt          # Archivo de texto que actúa como base de datos.
-└── README.md           # Este archivo.
+├── biblioteca.txt      # Archivo de texto que actúa como base de datos.
+└── README.md           # Este documento que estás leyendo en este momento.
 ```
 
 ### Descripción de Archivos Clave
