@@ -7,6 +7,7 @@ def menu():
     while True:
         try:
             limpiar_pantalla()
+            biblioteca.cargar_lista()
             print("--- Gestor de Biblioteca ---")
             print("1. Agregar libro")
             print("2. Ver todos los libros")
@@ -59,15 +60,37 @@ def menu():
                     while True:
                         try:
                             print(f"\nLibro encontrado:\nLibro: {libro_seleccionado.titulo}\nAutor: {libro_seleccionado.autor}\nAño de publicación: {libro_seleccionado.anio_publicacion}")
+                            if libro_seleccionado.__class__.__name__ == "LibroDigital":
+                                print(f"Formato: {libro_seleccionado.formato}")
+                            else:
+                                pass
                             print("".center(50, '-'))
                             estado = libro_seleccionado.get_estado()
                             print("Opciones:")
-                            if estado == "Disponible":
+                            if estado == "Disponible" and libro_seleccionado.__class__.__name__ == "Libro":
                                 print("1. Marcar como prestado")
-                            else:
+                            elif estado == "Prestado" and libro_seleccionado.__class__.__name__ == "Libro":
                                 print("1. Devolver libro")
-                            print("2. Editar datos del libro")
-                            print("3. Eliminar libro")
+                            else:
+                                pass
+                            if libro_seleccionado.__class__.__name__ == "Libro":
+                                print("2. Editar datos del libro")
+                            else:
+                                print("2. Cambiar formato del libro")
+                            if libro_seleccionado.__class__.__name__ == "Libro":
+                                libros = biblioteca.libros
+                                conteo_libros = 0
+                                for i, libro in enumerate(libros):
+                                    if libro[i].__class__.__name__ == "LibroDigital":
+                                        conteo_libros += 1                        
+                                if conteo_libros == 0:
+                                    print("3. Ingresar edición digital del libro")
+                                else:
+                                    pass
+                            if libro_seleccionado.__class__.__name__ == "LibroDigital":
+                                print("4. Eliminar edición digital del libro")
+                            else:
+                                print("4. Eliminar libro")
                             print("9. Volver al menú principal")
                             subopcion = int(input("Elige una opción: "))
                         except ValueError:
@@ -98,33 +121,69 @@ def menu():
                             input("Presiona Enter para continuar...")
                         elif subopcion == 2:
                             # Editar datos del libro
-                            pregunta_titulo = input("¿Desea editar el título? (S/N) ").upper()
-                            if pregunta_titulo == "S":
-                                nuevo_titulo = input("Nuevo título: ")
+                            if libro_seleccionado.__class__.__name__ == "Libro":  
+                                pregunta_titulo = input("¿Desea editar el título? (S/N) ").upper()
+                                if pregunta_titulo == "S":
+                                    nuevo_titulo = input("Nuevo título: ")
+                                else:
+                                    nuevo_titulo = libro_seleccionado.titulo
+                                pregunta_autor = input("¿Desea editar el autor? (S/N) ").upper()
+                                if pregunta_autor == "S":
+                                    nuevo_autor = input("Nuevo autor: ")
+                                else:
+                                    nuevo_autor = libro_seleccionado.autor
+                                pregunta_anio_publicacion = input("¿Desea editar el año de publicación? (S/N) ").upper()
+                                if pregunta_anio_publicacion == "S":
+                                    while True:
+                                        try:
+                                            nuevo_anio_publicacion = int(input("Nuevo año de publicación: "))
+                                            break
+                                        except ValueError:
+                                            print("Entrada inválida. Por favor, ingrese un número para el año.")
+                                else:
+                                    nuevo_anio_publicacion = libro_seleccionado.anio_publicacion
+                                biblioteca.editar_datos(libro_seleccionado, nuevo_titulo, nuevo_autor, nuevo_anio_publicacion)
                             else:
                                 nuevo_titulo = libro_seleccionado.titulo
-                            pregunta_autor = input("¿Desea editar el autor? (S/N) ").upper()
-                            if pregunta_autor == "S":
-                                nuevo_autor = input("Nuevo autor: ")
-                            else:
                                 nuevo_autor = libro_seleccionado.autor
-                            pregunta_anio_publicacion = input("¿Desea editar el año de publicación? (S/N) ").upper()
-                            if pregunta_anio_publicacion == "S":
-                                while True:
-                                    try:
-                                        nuevo_anio_publicacion = int(input("Nuevo año de publicación: "))
-                                        break
-                                    except ValueError:
-                                        print("Entrada inválida. Por favor, ingrese un número para el año.")
-                            else:
                                 nuevo_anio_publicacion = libro_seleccionado.anio_publicacion
-                            biblioteca.editar_datos(libro_seleccionado, nuevo_titulo, nuevo_autor, nuevo_anio_publicacion)
+                                if libro_seleccionado.formato == "PDF":
+                                    formato_digital = "EPUB"
+                                else:
+                                    formato_digital = "PDF"
+                                biblioteca.editar_datos(libro_seleccionado, nuevo_titulo, nuevo_autor, nuevo_anio_publicacion, formato_digital)
                             input("Presiona Enter para continuar...")
                         elif subopcion == 3:
+                            # Ingresar formato digital del libro
+                            while True:
+                                try:
+                                    print("Opciones:")
+                                    print("1. PDF")
+                                    print("2. EPUB")
+                                    formato_digital = input("Ingrese el formato digital del libro: ")
+                                    if formato_digital not in ["1", "2"]:
+                                        raise FormatoNoExistente
+                                    if formato_digital == "1":
+                                        formato_digital = "PDF"
+                                    else:
+                                        formato_digital = "EPUB"
+                                    biblioteca.crear_libro_digital(id_libro, libro_seleccionado.titulo, libro_seleccionado.autor, libro_seleccionado.anio_publicacion, formato_digital)
+                                    print("Libro digital creado con éxito.")
+                                    input("Presiona Enter para continuar...")
+                                    break
+                                except FormatoNoExistente:
+                                    print("No existe el formato digital seleccionado. Intenta de nuevo.")
+                                    input("Presiona Enter para continuar...")
+                                    continue
+                                except Exception as e:
+                                    print(f"Ocurrió un error: {e}")
+                                    input("Presiona Enter para continuar...")
+                                break
+                        elif subopcion == 4:
                             # Eliminar libro
                             r_u_sure = input("¿Está seguro de que desea eliminar este libro? (S/N) ").upper()
                             if r_u_sure == "S":
-                                biblioteca.eliminar_libro(libro_seleccionado.get_id())
+                                biblioteca.eliminar_libro(libro_seleccionado.get_id(), libro_seleccionado.__class__.__name__)
                                 print("\nLibro eliminado.")
                                 input("Presiona Enter para continuar...")
                                 break
